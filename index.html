@@ -222,11 +222,32 @@ textarea{width:100%;min-height:140px;background:#071a31;color:var(--text);border
   grid-template-columns:repeat(6, 1fr);
   gap:18px;
   align-items:center;
+  position:relative;
+  isolation:isolate;
+}
+.bracket-connectors{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+  overflow:visible;
+  z-index:0;
+}
+.bracket-connector{
+  fill:none;
+  stroke:rgba(34,199,255,.52);
+  stroke-width:2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  vector-effect:non-scaling-stroke;
 }
 .bracket-column{
   display:flex;
   flex-direction:column;
   gap:12px;
+  position:relative;
+  z-index:1;
 }
 .bracket-column h3{
   text-align:center;
@@ -245,16 +266,7 @@ textarea{width:100%;min-height:140px;background:#071a31;color:var(--text);border
   min-height:78px;
   box-shadow:0 12px 30px rgba(0,0,0,.22);
 }
-.bracket-node:after{
-  content:"";
-  position:absolute;
-  right:-19px;
-  top:50%;
-  width:18px;
-  height:2px;
-  background:rgba(34,199,255,.45);
-}
-.bracket-column:last-child .bracket-node:after{display:none}
+.bracket-node:after{display:none}
 .bracket-team{
   display:flex;
   justify-content:space-between;
@@ -598,15 +610,18 @@ nav button{white-space:nowrap; flex:0 0 auto}
   box-shadow:0 12px 30px rgba(0,0,0,.35);
   cursor:pointer;
 }
-.phase-tabs{
+.phase-tabs,.ko-phase-tabs{
   display:flex;
   gap:8px;
   overflow-x:auto;
   padding:4px 0 12px;
   margin-bottom:8px;
 }
-.phase-tabs button{
+.phase-tabs button,.ko-phase-tabs button{
   white-space:nowrap;
+}
+.ko-round.ko-phase-selected{
+  grid-column:span 12;
 }
 .bracket-column.phase-hidden{
   display:none;
@@ -806,6 +821,14 @@ nav button{white-space:nowrap; flex:0 0 auto}
         <button class="btn" onclick="resetKO()">Resetear eliminatorias</button>
       </div>
       <div id="championBox" style="margin:14px 0"></div>
+      <div class="ko-phase-tabs">
+        <button class="btn primary" onclick="setKOPhase('Dieciseisavos')">Dieciseisavos</button>
+        <button class="btn" onclick="setKOPhase('Octavos')">Octavos</button>
+        <button class="btn" onclick="setKOPhase('Cuartos')">Cuartos</button>
+        <button class="btn" onclick="setKOPhase('Semifinales')">Semifinales</button>
+        <button class="btn" onclick="setKOPhase('Final')">Final</button>
+        <button class="btn" onclick="setKOPhase('Todos')">Todos</button>
+      </div>
       <div id="knockoutWrap" class="grid"></div>
     </div>
   </section>
@@ -1437,11 +1460,52 @@ function renderBracketNode(m){
   const w = winnerOf(m);
   const real = isKOReal(m);
   const score = scoreTextForKO(m);
-  return `<div class="bracket-node">
+  return `<div class="bracket-node" data-match="${m.num}">
     <div class="bracket-meta"><span class="badge ${real?'good':'blue'}">P${m.num}</span><span class="muted">${score}</span></div>
     <div class="bracket-team ${w===m.a?'win':'loss'}"><span>${flag(m.a)} ${m.a}</span><span>${w===m.a?'✓':''}</span></div>
     <div class="bracket-team ${w===m.b?'win':'loss'}"><span>${flag(m.b)} ${m.b}</span><span>${w===m.b?'✓':''}</span></div>
   </div>`;
+}
+function drawBracketConnectors(){
+  const board = document.getElementById("visualBracket");
+  if(!board) return;
+  const previous = board.querySelector(".bracket-connectors");
+  if(previous) previous.remove();
+  if(currentBracketPhase !== "Todos" || window.innerWidth <= 1100 || !board.offsetWidth || !board.offsetHeight) return;
+
+  const links = [
+    [89,97],[90,97],[93,98],[94,98],[91,99],[92,99],[95,100],[96,100],
+    [97,101],[98,101],[99,102],[100,102],
+    [101,104],[102,104],[104,"champion"]
+  ];
+  const ns = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(ns,"svg");
+  svg.classList.add("bracket-connectors");
+  const width = board.scrollWidth;
+  const height = board.scrollHeight;
+  svg.setAttribute("viewBox",`0 0 ${width} ${height}`);
+  svg.setAttribute("aria-hidden","true");
+  const boardRect = board.getBoundingClientRect();
+
+  links.forEach(([from,to])=>{
+    const source = board.querySelector(`[data-match="${from}"]`);
+    const target = to === "champion"
+      ? board.querySelector('[data-round="Campeón"] .bracket-center')
+      : board.querySelector(`[data-match="${to}"]`);
+    if(!source || !target) return;
+    const sourceRect = source.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
+    const x1 = sourceRect.right - boardRect.left;
+    const y1 = sourceRect.top + sourceRect.height / 2 - boardRect.top;
+    const x2 = targetRect.left - boardRect.left;
+    const y2 = targetRect.top + targetRect.height / 2 - boardRect.top;
+    const middleX = x1 + (x2 - x1) / 2;
+    const path = document.createElementNS(ns,"path");
+    path.setAttribute("class","bracket-connector");
+    path.setAttribute("d",`M ${x1} ${y1} H ${middleX} V ${y2} H ${x2}`);
+    svg.appendChild(path);
+  });
+  board.prepend(svg);
 }
 let currentBracketPhase = "Todos";
 function setBracketPhase(phase){
@@ -1475,18 +1539,36 @@ function renderVisualBracket(){
     const active = (currentBracketPhase==="Todos" || currentBracketPhase===title) ? "phase-active" : "phase-hidden";
     return `<div class="bracket-column ${active}" data-round="${title}"><h3>${title}</h3>${list.map(renderBracketNode).join("")}</div>`;
   }).join("");
+  requestAnimationFrame(()=>requestAnimationFrame(drawBracketConnectors));
 }
 
+window.addEventListener("resize",()=>requestAnimationFrame(drawBracketConnectors));
+
+let currentKOPhase = "Dieciseisavos";
+function setKOPhase(phase){
+  currentKOPhase = phase;
+  document.querySelectorAll("#eliminatorias .ko-phase-tabs button").forEach(btn=>btn.classList.remove("primary"));
+  const btns = [...document.querySelectorAll("#eliminatorias .ko-phase-tabs button")];
+  const active = btns.find(btn=>btn.textContent.trim()===phase);
+  if(active) active.classList.add("primary");
+  renderKnockout();
+}
 function renderKnockout(){
   const el = document.getElementById("knockoutWrap");
   if(!el) return;
   const {matches, map} = buildKnockout();
   const rounds = ["Dieciseisavos","Octavos","Cuartos","Semifinales","Tercer puesto","Final"];
+  const visibleRounds = currentKOPhase === "Todos"
+    ? rounds
+    : currentKOPhase === "Final"
+      ? ["Tercer puesto","Final"]
+      : [currentKOPhase];
   const champion = winnerOf(map[104]);
   document.getElementById("championBox").innerHTML = `<div class="champion"><span style="font-size:34px">🏆</span><div><span class="muted">Campeón proyectado / cargado</span><br><b>${flag(champion)} ${champion}</b></div></div>`;
-  el.innerHTML = rounds.map(round=>{
+  el.innerHTML = visibleRounds.map(round=>{
     const list = matches.filter(m=>m.round===round);
-    return `<div class="card ko-round"><h3>${round}</h3>${list.map(renderKOMatch).join("")}</div>`;
+    const selectedClass = currentKOPhase === "Todos" ? "" : " ko-phase-selected";
+    return `<div class="card ko-round${selectedClass}"><h3>${round}</h3>${list.map(renderKOMatch).join("")}</div>`;
   }).join("");
   renderVisualBracket();
 }
