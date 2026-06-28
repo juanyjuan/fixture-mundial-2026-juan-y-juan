@@ -1125,7 +1125,7 @@ function openKOFromFixture(round){
 
 function renderKOFixtureCard(m){
   const sched = KO_SCHEDULE[m.num] || {};
-  const r = koResults[m.num] || {};
+  const r = getKOResult(m.num);
   const real = isKOReal(m);
   const hasScore = r.a!=="" && r.b!=="" && r.a!==undefined && r.b!==undefined;
   const projection = getKOPrediction(m);
@@ -1140,7 +1140,7 @@ function renderKOFixtureCard(m){
     </div>
     <div class="ko-teams">
       <div>${flag(m.a)} ${m.a}</div>
-      <div class="scoreline">${score}${hasScore?'':' <small style="font-size:11px;color:var(--muted)">PROY.</small>'}</div>
+      <div class="scoreline">${score}${hasScore?' <small style="font-size:11px;color:var(--good)">REAL</small>':' <small style="font-size:11px;color:var(--muted)">PROY.</small>'}</div>
       <div style="text-align:right">${flag(m.b)} ${m.b}</div>
     </div>
     <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
@@ -1418,6 +1418,9 @@ function importData(){
 
 const OFFICIAL_KO_RESULTS = {"73":{"a":0,"b":1,"winner":"Canadá"}};
 let koResults = {...JSON.parse(localStorage.getItem("wc2026_knockout_v2") || "{}"), ...OFFICIAL_KO_RESULTS};
+function getKOResult(num){
+  return OFFICIAL_KO_RESULTS[String(num)] || koResults[num] || {};
+}
 let koOverrides = JSON.parse(localStorage.getItem("wc2026_ko_overrides_v24") || "{}");
 
 const CALIBRATION_VERSION = "2026-06-28-final-groups-v1";
@@ -1569,7 +1572,7 @@ function projectedKOScoreText(m){
 }
 
 function winnerOf(match){
-  const r = koResults[match.num];
+  const r = getKOResult(match.num);
   if(r && r.winner && (r.winner===match.a || r.winner===match.b)) return r.winner;
   if(r && r.a!=="" && r.b!=="" && r.a!==undefined && r.b!==undefined){
     if(+r.a > +r.b) return match.a;
@@ -1619,11 +1622,11 @@ function getKOPredictedWinner(m){
 }
 
 function isKOReal(m){
-  const r = koResults[m.num];
+  const r = getKOResult(m.num);
   return !!(r && ((r.a!=="" && r.b!=="" && r.a!==undefined && r.b!==undefined) || r.winner));
 }
 function scoreTextForKO(m){
-  const r = koResults[m.num];
+  const r = getKOResult(m.num);
   if(r && r.a!=="" && r.b!=="" && r.a!==undefined && r.b!==undefined) return `${r.a}-${r.b}`;
   const p = getKOPrediction(m);
   return `${p.scoreA}-${p.scoreB} proy.`;
@@ -1794,7 +1797,7 @@ function clearKOOverride(num){
 
 const KO_SCHEDULE = {"73":{"date":"Domingo 28/06","timeARG":"16:00 ARG"},"74":{"date":"Lunes 29/06","timeARG":"17:30 ARG"},"75":{"date":"Lunes 29/06","timeARG":"22:00 ARG"},"76":{"date":"Lunes 29/06","timeARG":"14:00 ARG"},"77":{"date":"Martes 30/06","timeARG":"18:00 ARG"},"78":{"date":"Martes 30/06","timeARG":"14:00 ARG"},"79":{"date":"Martes 30/06","timeARG":"22:00 ARG"},"80":{"date":"Miércoles 01/07","timeARG":"13:00 ARG"},"81":{"date":"Miércoles 01/07","timeARG":"21:00 ARG"},"82":{"date":"Miércoles 01/07","timeARG":"17:00 ARG"},"83":{"date":"Jueves 02/07","timeARG":"20:00 ARG"},"84":{"date":"Jueves 02/07","timeARG":"16:00 ARG"},"85":{"date":"Viernes 03/07","timeARG":"00:00 ARG"},"86":{"date":"Viernes 03/07","timeARG":"19:00 ARG"},"87":{"date":"Viernes 03/07","timeARG":"22:30 ARG"},"88":{"date":"Viernes 03/07","timeARG":"15:00 ARG"},"89":{"date":"Sábado 04/07","timeARG":"14:00 ARG"},"90":{"date":"Sábado 04/07","timeARG":"18:00 ARG"},"91":{"date":"Domingo 05/07","timeARG":"17:00 ARG"},"92":{"date":"Domingo 05/07","timeARG":"21:00 ARG"},"93":{"date":"Lunes 06/07","timeARG":"16:00 ARG"},"94":{"date":"Lunes 06/07","timeARG":"21:00 ARG"},"95":{"date":"Martes 07/07","timeARG":"13:00 ARG"},"96":{"date":"Martes 07/07","timeARG":"17:00 ARG"},"97":{"date":"Jueves 09/07","timeARG":"17:00 ARG"},"98":{"date":"Viernes 10/07","timeARG":"16:00 ARG"},"99":{"date":"Sábado 11/07","timeARG":"18:00 ARG"},"100":{"date":"Sábado 11/07","timeARG":"22:00 ARG"},"101":{"date":"Martes 14/07","timeARG":"16:00 ARG"},"102":{"date":"Miércoles 15/07","timeARG":"16:00 ARG"},"103":{"date":"Sábado 18/07","timeARG":"18:00 ARG"},"104":{"date":"Domingo 19/07","timeARG":"16:00 ARG"}};
 function renderKOMatch(m){
-  const r = koResults[m.num] || {};
+  const r = getKOResult(m.num);
   const w = winnerOf(m);
   const projection = getKOPrediction(m);
   const predicted = projection.winner;
