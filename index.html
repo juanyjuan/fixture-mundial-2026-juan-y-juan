@@ -1416,7 +1416,8 @@ function importData(){
 }
 
 
-let koResults = JSON.parse(localStorage.getItem("wc2026_knockout_v2") || "{}");
+const OFFICIAL_KO_RESULTS = {"73":{"a":0,"b":1,"winner":"Canadá"}};
+let koResults = {...JSON.parse(localStorage.getItem("wc2026_knockout_v2") || "{}"), ...OFFICIAL_KO_RESULTS};
 let koOverrides = JSON.parse(localStorage.getItem("wc2026_ko_overrides_v24") || "{}");
 
 const CALIBRATION_VERSION = "2026-06-28-final-groups-v1";
