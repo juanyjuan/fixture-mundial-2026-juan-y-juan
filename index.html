@@ -1416,7 +1416,7 @@ function importData(){
 }
 
 
-const OFFICIAL_KO_RESULTS = {"73":{"a":0,"b":1,"winner":"Canadá"}};
+const OFFICIAL_KO_RESULTS = {"73":{"a":0,"b":1,"winner":"Canadá"},"74":{"a":1,"b":1,"winner":"Paraguay"},"76":{"a":2,"b":1,"winner":"Brasil"}};
 let koResults = {...JSON.parse(localStorage.getItem("wc2026_knockout_v2") || "{}"), ...OFFICIAL_KO_RESULTS};
 function getKOResult(num){
   return OFFICIAL_KO_RESULTS[String(num)] || koResults[num] || {};
