@@ -773,9 +773,9 @@ nav button{white-space:nowrap; flex:0 0 auto}
           </p>
           <div class="hero-actions hero-actions-final">
             <button class="btn primary hero-main-btn" onclick="showSection('partidos')">⚽ Ver partidos</button>
-            <button class="btn" onclick="showSection('tablas')">📊 Tablas</button>
+            <button class="btn" onclick="showSection('partidos')">⚽ Partidos</button>
+            <button class="btn" onclick="showSection('eliminatorias')">🔀 Llaves</button>
             <button class="btn" onclick="showSection('cuadro')">🏆 Cuadro</button>
-            <button class="btn" onclick="showSection('exportar')">💾 Guardar</button>
           </div>
           <div class="quick-icons">
             <div>⚽<b>Resultados reales</b><small>carga manual</small></div>
@@ -1010,8 +1010,8 @@ function updateProjectionUI(){
 
 
 const sections = [
-  ["inicio","Inicio"],["grupos","Grupos"],["selecciones","Equipos"],
-  ["partidos","Partidos"],["tablas","Tablas"],["terceros","3ros clasificados"],["eliminatorias","Llaves"],["cuadro","Cuadro"],["exportar","Guardar avance"]
+  ["inicio","Inicio"],["partidos","Partidos"],["eliminatorias","Llaves"],["cuadro","Cuadro"],
+  ["grupos","Grupos"],["selecciones","Equipos"],["tablas","Tablas"],["terceros","3ros clasificados"]
 ];
 
 function flag(team){ return DATA.flags[team] || "🏳️"; }
@@ -1457,7 +1457,7 @@ function importData(){
 }
 
 
-const OFFICIAL_KO_RESULTS = {"73":{"a":0,"b":1,"winner":"Canadá"},"74":{"a":1,"b":1,"winner":"Paraguay"},"76":{"a":2,"b":1,"winner":"Brasil"}};
+const OFFICIAL_KO_RESULTS = {"73":{"a":0,"b":1,"winner":"Canadá"},"74":{"a":1,"b":1,"winner":"Paraguay"},"75":{"a":1,"b":1,"winner":"Marruecos"},"76":{"a":2,"b":1,"winner":"Brasil"}};
 let koResults = {...JSON.parse(localStorage.getItem("wc2026_knockout_v2") || "{}"), ...OFFICIAL_KO_RESULTS};
 function getKOResult(num){
   return OFFICIAL_KO_RESULTS[String(num)] || koResults[num] || {};
