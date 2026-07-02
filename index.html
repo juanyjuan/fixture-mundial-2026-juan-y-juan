@@ -1159,8 +1159,9 @@ function openKOFromFixture(round){
 
 function renderKOFixtureCard(m){
   const sched = KO_SCHEDULE[m.num] || {};
-  const r = getKOResult(m.num);
-  const real = isKOReal(m);
+  const officialResult = OFFICIAL_KO_RESULTS[String(m.num)];
+  const r = officialResult || getKOResult(m.num);
+  const real = !!officialResult || isKOReal(m);
   const hasScore = r.a!=="" && r.b!=="" && r.a!==undefined && r.b!==undefined;
   const projection = getKOPrediction(m);
   const score = hasScore ? `${r.a}-${r.b}` : `${projection.scoreA}-${projection.scoreB}`;
