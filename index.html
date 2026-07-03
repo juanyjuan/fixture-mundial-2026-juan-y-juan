@@ -1458,7 +1458,7 @@ function importData(){
 }
 
 
-const OFFICIAL_KO_RESULTS = {"73":{"a":0,"b":1,"winner":"Canadá"},"74":{"a":1,"b":1,"winner":"Paraguay"},"75":{"a":1,"b":1,"winner":"Marruecos"},"76":{"a":2,"b":1,"winner":"Brasil"},"77":{"a":3,"b":0,"winner":"Francia"},"78":{"a":1,"b":2,"winner":"Noruega"},"79":{"a":2,"b":0,"winner":"México"},"80":{"a":2,"b":1,"winner":"Inglaterra"},"81":{"a":2,"b":0,"winner":"Estados Unidos"},"82":{"a":3,"b":2,"winner":"Bélgica"}};
+const OFFICIAL_KO_RESULTS = {"73":{"a":0,"b":1,"winner":"Canadá"},"74":{"a":1,"b":1,"winner":"Paraguay"},"75":{"a":1,"b":1,"winner":"Marruecos"},"76":{"a":2,"b":1,"winner":"Brasil"},"77":{"a":3,"b":0,"winner":"Francia"},"78":{"a":1,"b":2,"winner":"Noruega"},"79":{"a":2,"b":0,"winner":"México"},"80":{"a":2,"b":1,"winner":"Inglaterra"},"81":{"a":2,"b":0,"winner":"Estados Unidos"},"82":{"a":3,"b":2,"winner":"Bélgica"},"83":{"a":2,"b":1,"winner":"Portugal"},"84":{"a":3,"b":0,"winner":"España"}};
 let koResults = {...JSON.parse(localStorage.getItem("wc2026_knockout_v2") || "{}"), ...OFFICIAL_KO_RESULTS};
 function getKOResult(num){
   return OFFICIAL_KO_RESULTS[String(num)] || koResults[num] || {};
